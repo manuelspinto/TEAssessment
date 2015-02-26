@@ -1,0 +1,39 @@
+  DIGITALOCEAN                   AMS3-EQIX            5.101.110.2        202018
+  DIGITALOCEAN                   AMS2-TCITY5          95.85.0.2          200130
+  NTT-A                          CA                   129.250.0.11       2914
+  INTERNETSOLUTIONS              SAFRICA              168.209.255.56     3741
+  ZEROFAIL                       CANADA               216.221.157.162    40191
+  Telia                          NYC                  80.91.255.62       1299
+  AOL                            ORD                  66.185.128.1       1668
+  ENA                            TN                   96.4.0.55          11686
+  OBITRU                         StPetersburg         85.114.0.217       8492
+  SEACOM                         AFRICA               41.217.212.5       37100
+  SeaBone                        NEW                  195.22.216.188     6762
+  INIT7                          Zurich               213.144.128.203    13030
+  Global Crossing                Palo Alto            67.17.82.114       3549
+  Group Telecom Service          BC                   216.18.31.102      6539
+  DIGITALOCEAN                   NYC2-NYIIX           192.241.164.4      62567
+  FIBRENOIRE                     TORONTO              68.67.63.245       22652
+  Sprint                         Stockton             144.228.241.130    1239
+  TELUS                          Calgary              154.11.98.225      852
+  DIGITALOCEAN                   NYC3-DECIX           162.243.188.2      393406
+  ESNet                          SUNNYVALE            198.129.33.85      293
+  Level3                         SEA                  4.69.184.193       3356
+  KPNE                           AMSIX                134.222.87.1       286
+  uunet                          mci                  157.130.10.233     701
+  PSG                            SEA                  147.28.7.2         3130
+  APAN/tppr-tokyo                ORD                  203.181.248.168    7660
+  Tiscali                                             89.149.178.10      3257
+  Hurricane Electric             SJ                   216.218.252.164    6939
+  DAISYCOMM                      DAISYCOMM            194.153.0.253      5413
+  Global Crossing                London               208.51.134.246     3549
+  Telstra                        Sydney               203.62.252.186     1221
+  PSG                            SEA                  147.28.7.1         3130
+  CENTURYLINK                    SF                   206.24.210.80      3561
+  IIJ                            Japan                202.232.0.3        2497
+  CENIC                          CA                   137.164.16.84      2152
+  ATT                            CA                   12.0.1.63          7018
+  IP-PLUS                        ZRH                  164.128.32.11      3303
+
+
+
