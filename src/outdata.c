@@ -1,98 +1,11 @@
-/* search.c */
-
 #include "global.h"
 #include "search.h"
 #include "file.h"
 #include "tree.h"
-
-void search_do(int opt, char** argv, FILE *fp){
-	switch(opt){
-		case 1 :
-			search_address_space_statistics(fp);
-			break;
-		case 2 :
-			search_prepare_data(fp,argv[1]);
-			break;
-		default :
-			break;
-	}
-	return;
-}
-
-void search_address_space_statistics(FILE *fp){
-	int total_entries = 0;
-	int mask_count[33];
-	int i;
-	char buff[BUFF_SIZE];
-	
-	int mask;
-
-	int mask_g_24 = 0;
-	int mask_24 = 0;
-	int mask_17_23 = 0;
-	int mask_16 = 0;
-	int mask_8_15 = 0;
-	int mask_l_8 = 0;
-
-	for(i = 0; i <= 32; i++)
-		mask_count[i] = 0;
-
-	while(fgets(buff, sizeof(buff), fp) != NULL){
-		if(buff[0] == 'P'){
-			mask = get_mask(buff);
-			mask_count[mask]++;
-			total_entries++;
-		}
-	}
-
-	for(i = 25; i <= 32 ; i++)
-		mask_g_24 += mask_count[i];
-	mask_24 = mask_count[24];
-	for(i = 17; i <= 23  ; i++)
-		mask_17_23 += mask_count[i];
-	mask_16 = mask_count[16];
-	for(i = 8; i <= 15  ; i++)
-		mask_8_15 += mask_count[i];
-
-		mask_l_8 += mask_count[8];
-	
-
-	printf("Address Space Statistics:\n");
-
-	printf("/>24\t%.2lf%%\t(%d)\n",		100*((double) mask_g_24) / ((double) total_entries), mask_g_24);
-	printf("/24\t%.2lf%%\t(%d)\n",		100*((double) mask_24) / ((double) total_entries), mask_24);
-	printf("/17-/23\t%.2lf%%\t(%d)\n",	100*((double) mask_17_23) / ((double) total_entries), mask_17_23);
-	printf("/16\t%.2lf%%\t(%d)\n",		100*((double) mask_16) / ((double) total_entries), mask_16);
-	printf("/8-/15\t%.2lf%%\t(%d)\n",	100*((double) mask_8_15) / ((double) total_entries), mask_8_15);
-	printf("/<8\t%.2lf%%\t(%d)\n",		100*((double) mask_l_8) / ((double) total_entries), mask_l_8);
-
-	return;
-}
-
-int get_mask(char *px_str){
-	int i;
-	char mask[3];
-
-	for(i = 0; i < strlen(px_str);i++)
-		if(px_str[i] == '/'){
-			mask[0] = px_str[i+1];
-			mask[1] = px_str[i+2];
-			mask[2] = '\0';
-		}
-
-	return atoi(mask);
-}
+#include "outdata.h"
 
 void search_prepare_data(FILE *fp, char* fname){
 	int i;
-
-	int index = 0;
-	int totpx = 0;
-	int delpx = 0;
-	int deapx = 0;
-	int lonpx = 0;
-	int toppx = 0;
-	char string[33];
 
 	char *dir_rib_out = "rib_out/";
 	char fname_out[128];
@@ -105,9 +18,6 @@ void search_prepare_data(FILE *fp, char* fname){
 	char px[20], mask[10];
 	int stat = 0;
 	int as_entry = -1;
-	Line line;
-	Node * root = NodeNew();
-
 	strcpy(fname_out,fname);
 	strcat(fname_out,".out.txt");
 	fix_path(fname_out,dir_rib_out);
@@ -140,30 +50,11 @@ void search_prepare_data(FILE *fp, char* fname){
 				if(stat == 0 && as_entry != -1){
 					fprintf(fp_collector[as_entry],"%s %s %s %s %s\n"
 														  ,as_col,as_nei,as_ori,px,mask);
-					
-					if(strcmp(as_col,"3549") == 0){
-						strcpy(line.ip, dec2bin(px));
-	    				line.mask = atoi(mask);
-	    				strcpy(line.asn, as_ori);
-	    				TreeInsert(root,line);
-    				}
-
 				}
 				fputs("\n", fp_out);
 			}
 		}
 	}
-	TreeSpread(root,NULL);
-	index = -1;
-    TablePrint(root, NULL, &string[0], &index, &totpx, &delpx, &deapx, &lonpx, &toppx);
-    totpx = delpx + deapx + toppx + lonpx;
-    printf("\n\nTOTAL: %d\n\n",totpx);
-    printf("TOP: %d\t\t\t(%.2lf)\n",toppx,(((double)toppx)/((double)totpx)) * 100);
-    printf("DEAGGREGATED: %d\t\t(%.2lf)\n",deapx,(((double)deapx)/((double)totpx)) * 100);
-    printf("DELEGATED: %d\t\t(%.2lf)\n",delpx,(((double)delpx)/((double)totpx)) * 100);
-    printf("LONELY: %d\t\t\t(%.2lf)\n\n",lonpx,(((double)lonpx)/((double)totpx)) * 100);
-
-    TreeClean(root);
 
 
 	printf("done!\nOutput file: '%s'\n",fname_out);
@@ -215,7 +106,7 @@ void fix_path(char *fullpath, char *path){
 
 	get_fname(&fname[0], fullpath);
 
-	for(i = 2; i < len; i++) /* ignore './' */
+	for(i = 3; i < len; i++) /* ignore '../' */
 		if(fullpath[i] == '/')
 			fullpath[i+1] = '\0';
 	strcat(fullpath,path);
@@ -257,6 +148,4 @@ int get_as_entry(char *asn){
 	
 	return -1;
 }
-
-
 

@@ -9,8 +9,8 @@ vpath %.h include/
 .c.o:
 	$(CC) $(CFLAGS) -c -I include/ -o obj/$@ $<
 
-bin/rv: main.o search.o file.o arguments.o global.o tree.o
-	$(CC) -o $@ obj/main.o obj/search.o obj/file.o obj/arguments.o obj/global.o obj/tree.o
+bin/rv: main.o search.o file.o arguments.o global.o tree.o astat.o outdata.o pstat.o
+	$(CC) -o $@ obj/main.o obj/search.o obj/file.o obj/arguments.o obj/global.o obj/tree.o obj/astat.o obj/outdata.o obj/pstat.o
 
 main.o: main.c
 
@@ -23,6 +23,12 @@ arguments.o: arguments.c arguments.h
 global.o: global.c global.h
 
 tree.o: tree.c tree.h
+
+astat.o: astat.c astat.h
+
+outdata.o: outdata.c outdata.h
+
+pstat.o: pstat.c pstat.h
 
 clean::
 	rm -f obj/*.o bin/rv *~

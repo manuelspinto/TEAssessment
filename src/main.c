@@ -8,16 +8,12 @@ int main(int argc, char *argv[]){
 	FILE *fp;
   char *rv_file_name = NULL;
   int option;
-  /*char **file_buffer;*/
 
   option = args_verify(argc, argv);
   args_set(argv, &rv_file_name);
 
   fp = file_open(rv_file_name);
   search_do(option,argv,fp);
-  
-  /*file_buffer = file_malloc(fp, rv_file_name);*/
-
 
 
   file_close(fp);

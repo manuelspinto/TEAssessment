@@ -5,10 +5,12 @@
 
 
 void args_print_options(void){
-	printf("usage: rv route_views_file.txt [--option]\n\n");
-	printf("[--astat] Address Space Statistics\n");
-	printf("[--ppdata] Prepare data for Traffic Engineering Analysis\n");
-	printf("[--pstat] Prefix Type Statistics\n");
+	printf("usage: rv <file> [--option]\n");
+	printf("\troute_views.txt\n");
+	printf("\t\t[--astat] Address Space Statistics\n");
+	printf("\t\t[--outdata] Prepare data for Traffic Engineering Analysis\n");
+	printf("\tcollector.txt\n");
+	printf("\t\t[--pstat] Prefix Type Statistics\n");
 }
 
 int args_verify(int argc, char **argv){
@@ -19,8 +21,14 @@ int args_verify(int argc, char **argv){
 	
 	if(strcmp(argv[2],"--astat") == 0)
 		return 1;
-	else if (strcmp(argv[2],"--ppdata") == 0)
+	else if (strcmp(argv[2],"--outdata") == 0)
 		return 2;
+	else if (strcmp(argv[2],"--pstat") == 0)
+		return 3;
+	else{
+		printf("Not a valid option\n");
+		exit(0);
+	}
 
 	return -1;
 }
