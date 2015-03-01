@@ -15,7 +15,6 @@ int main(int argc, char *argv[]){
   fp = file_open(rv_file_name);
   search_do(option,argv,fp);
 
-
   file_close(fp);
 
 	return 0;

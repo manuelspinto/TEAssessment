@@ -59,7 +59,6 @@ void search_prepare_data(FILE *fp, char* fname){
 
 	printf("done!\nOutput file: '%s'\n",fname_out);
 
-	file_close(fp_out);
 	for(i = 0; i < COLL_SIZE ; i++)
 		file_close(fp_collector[i]);
 

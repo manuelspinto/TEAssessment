@@ -11,6 +11,7 @@ void args_print_options(void){
 	printf("\t\t[--outdata] Prepare data for Traffic Engineering Analysis\n");
 	printf("\tcollector.txt\n");
 	printf("\t\t[--pstat] Prefix Type Statistics\n");
+	printf("\t\t[--ndstat] Neighbor Deaggregation Statistics\n");
 }
 
 int args_verify(int argc, char **argv){
@@ -25,6 +26,8 @@ int args_verify(int argc, char **argv){
 		return 2;
 	else if (strcmp(argv[2],"--pstat") == 0)
 		return 3;
+	else if (strcmp(argv[2],"--ndstat") == 0)
+		return 4;
 	else{
 		printf("Not a valid option\n");
 		exit(0);

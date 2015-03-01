@@ -2,13 +2,30 @@
 #include "search.h"
 #include "file.h"
 #include "tree.h"
+#include "ndstat.h"
 
 Node * NodeNew(){
   Node *new = (Node *) malloc(sizeof(Node));
   strcpy(new->asn, "-1");
+
+  new->parent = NULL;
+
   new->px = 0;
+  new->neighbor = NULL;
   new->lc = NULL;
  	new->rc = NULL;
+  new->child = NULL;
+  new->nnei = 0;
+
+  return new;
+}
+
+Child * ChildNew(Node *node, Child *next){
+  Child *new = (Child *) malloc(sizeof(Child));
+
+  new->node = node;
+  new->next = next;
+  
   return new;
 }
 
@@ -138,7 +155,7 @@ char * bin2dec(char *bin){
   return decstr;
 } 
 
-void TreeInsert(Node * root, Line l){
+void TreeInsert(Node * root, Line l, nInfo info){
   int i;
   Node *p = root;
   int mask = l.mask;
@@ -159,21 +176,81 @@ void TreeInsert(Node * root, Line l){
   }
   strcpy(p->asn, l.asn);
   p->px = 1;
+  p->info = info;
+
   return;
 }
 
-void TreeSpread(Node * root, Node * p){
+void TreeSpread(Node * root){
   
-  
-  /* Conjunto de operações responsáveis por propagar na àrvore */
   if(root == NULL) return;
   if(root->lc != NULL && (strcmp(root->lc->asn, "-1") == 0))
     strcpy(root->lc->asn, root->asn);
   if(root->rc != NULL && (strcmp(root->rc->asn, "-1") == 0))
     strcpy(root->rc->asn, root->asn);
   
-  TreeSpread(root->lc, root);
-  TreeSpread(root->rc, root);
+  TreeSpread(root->lc);
+  TreeSpread(root->rc);
+  
+  return;
+}
+
+Node *BuildPrefixTree(FILE *fp){
+  char buff[BUFF_SIZE];
+  char px[33], mask[10];
+  char as_ori[AS_SIZE];
+  char as_nei[AS_SIZE];
+  char as_col[AS_SIZE];
+
+  Line line;
+  nInfo n_info;
+  Node *root = NodeNew();
+  root->parent = root;
+
+  while(fgets(buff, sizeof(buff), fp) != NULL){
+    if(buff[strlen(buff)-1] == '\n')
+      buff[strlen(buff)-1] = '\0';
+
+    
+    sscanf(buff,"%s %s %s %s %s", as_col, as_nei, as_ori, px, mask);
+
+    strcpy(n_info.col, as_col);
+    strcpy(n_info.nei, as_nei);
+    strcpy(n_info.ori, as_ori);
+    strcpy(n_info.px , px);
+    n_info.mask = atoi(mask);
+
+    strcpy(line.ip, dec2bin(px));
+    line.mask = atoi(mask);
+    strcpy(line.asn, as_ori);
+
+    TreeInsert(root,line,n_info);
+  }
+
+  TreeSpread(root);
+
+  return root;
+}
+
+
+void TreeParentSpread(Node * root){
+  
+  if(root == NULL) return;
+  if(root->lc != NULL && strcmp(root->lc->asn,"-1") != 0){
+    if(strcmp(root->lc->asn, root->asn) == 0)
+      root->lc->parent = root->parent;
+    else
+      root->lc->parent = root->lc;
+  }
+  if(root->rc != NULL && strcmp(root->rc->asn,"-1") != 0){
+    if(strcmp(root->rc->asn, root->asn) == 0)
+      root->rc->parent = root->parent;
+    else
+      root->rc->parent = root->rc;
+  }
+  
+  TreeParentSpread(root->lc);
+  TreeParentSpread(root->rc);
   
   return;
 }
@@ -199,7 +276,6 @@ void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int 
       else
         (*delpx)++; 
     }
-
   }
   
   if(root->lc != NULL){
@@ -224,31 +300,5 @@ void TreeClean(Node * root){
   TreeClean(root->rc);
   
   free(root);
-}
-
-void TreeBuild(Node *root, char *fname){
-  FILE *fp;
-  char buff[512];
-  char ip[16];
-  char asn[128];
-  int mask;
-  Line line;
-  
-  fp = fopen(fname,"r");
-  if(fp == NULL){
-    printf("ERROR: Impossivel abrir o ficheiro '%s'\n",fname);
-    exit(1);
-  }
-  
-  while (fgets(buff, sizeof(buff), fp) != NULL ){
-    sscanf(buff,"%s\t%d\t%s",ip,&mask,asn);
-    strcpy(line.ip, dec2bin(ip));
-    line.mask = mask;
-    strcpy(line.asn, asn);
-
-    TreeInsert(root,line);
-  }
-  fclose(fp);
-  return;
 }
 
