@@ -3,7 +3,7 @@
 #include "file.h"
 #include "tree.h"
 #include "pstat.h"
-#include "ndstat.h"
+#include "dstat.h"
 
 
 void search_neighbor_deaggregation_statistics(Node *root){
@@ -56,10 +56,12 @@ void ChildSpread(Node *root){
 
 void getStat(Node *root, int *top, int *ncount){
 
-  if(root->px == 1)
+  if(root->px == 1 && root->child != NULL)
     if(root->parent == root && root->nnei != 0){
     	(*top)++;
     	ncount[root->nnei-1]++;
+    	if(root->nnei == 24)
+    		printf("%s: %s/%d\n",root->asn,root->info.px,root->info.mask);
     }
   
   if(root->lc != NULL)

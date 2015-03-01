@@ -2,7 +2,7 @@
 #include "search.h"
 #include "file.h"
 #include "tree.h"
-#include "ndstat.h"
+#include "dstat.h"
 
 Node * NodeNew(){
   Node *new = (Node *) malloc(sizeof(Node));
