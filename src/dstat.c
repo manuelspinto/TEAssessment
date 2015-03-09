@@ -50,9 +50,9 @@ void search_deaggregation_length_statistics(Node *root){
 
   getStatLen(root,&top,&deag, lencount);
 
-  printf("\n** Prefix length statistics **\n\n");
+  printf("\n** Path length statistics **\n\n");
   printf("#Top prefixes: %d\t#Deag prefixes: %d\n\n",top,deag);
-  printf("#nhP-nhC\t#nDeag%%nDeag\n");
+  printf("#nhP-nhC\t#nDeag\t%%nDeag\n");
   for(i= 0 ; i< (2*LEN_OFFSET+1); i++)
     if(lencount[i] != 0)
       printf("%d\t\t%d\t(%.2lf%%)\n",-LEN_OFFSET + i,lencount[i],(((double)lencount[i])/((double)deag)) * 100);

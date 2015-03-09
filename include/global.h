@@ -8,10 +8,13 @@
 
 #define BUFF_SIZE 512
 #define COLL_SIZE 36
+#define COLL_SIZE_IPV6 17
 #define AS_SIZE 40
 
-extern char collector_asn[36][10];
-extern char collector_px[36][16];
+extern char collector_asn[COLL_SIZE][10];
+extern char collector_asn_ipv6[COLL_SIZE_IPV6][10];
+
+extern char collector_px[COLL_SIZE][16];
 
 extern char ip_version;
 

@@ -7,7 +7,7 @@ typedef struct neighbor{
 } Neighbor;
 
 typedef struct line{
-  char ip[33];
+  char ip[129];
   char asn[AS_SIZE];
   int mask;
 } Line;
@@ -46,6 +46,10 @@ Child * ChildNew(Node *node, Child *next);
 int asncmp(char *asn, char *pasn);
 char * dec2bin(char *decstr);
 char * bin2dec(char *bin);
+char *hex2binv6(char *px);
+void insert_block(char *px, char block[4], int b);
+char * hex2bin4(char hex);
+
 void TreeInsert(Node * root, Line l, nInfo info);
 void TreeSpread(Node * root);
 void TreeParentSpread(Node * root);
@@ -53,5 +57,6 @@ void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int 
 void TreeClean(Node * root);
 
 Node *BuildPrefixTree(FILE *fp);
+Node *BuildPrefixTree_ipv6(FILE *fp);
 void get_ori_px_mask(char *buff, char *as_ori, char *px, char *mask);
 

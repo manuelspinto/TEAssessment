@@ -239,6 +239,49 @@ Node *BuildPrefixTree(FILE *fp){
   return root;
 }
 
+Node *BuildPrefixTree_ipv6(FILE *fp){
+  char buff[BUFF_SIZE];
+  char px[33], mask[10];
+  char as_ori[AS_SIZE];
+  char as_nei[AS_SIZE];
+  char as_col[AS_SIZE];
+  char prep;
+  int  plen;
+  int  hlen;
+
+  Line line;
+  nInfo n_info;
+  Node *root = NodeNew();
+  root->parent = root;
+
+  while(fgets(buff, sizeof(buff), fp) != NULL){
+    if(buff[strlen(buff)-1] == '\n')
+      buff[strlen(buff)-1] = '\0';
+
+    
+    sscanf(buff,"%c %d %d %s %s %s %s %s",&prep, &plen, &hlen, as_col, as_nei, as_ori, px, mask);
+
+    n_info.prep = prep;
+    n_info.plen = plen;
+    n_info.hlen = hlen;
+    strcpy(n_info.col, as_col);
+    strcpy(n_info.nei, as_nei);
+    strcpy(n_info.ori, as_ori);
+    strcpy(n_info.px , px);
+    n_info.mask = atoi(mask);
+
+    strcpy(line.ip, hex2binv6(px));
+    line.mask = atoi(mask);
+    strcpy(line.asn, as_ori);
+
+    TreeInsert(root,line,n_info);
+  }
+
+  TreeSpread(root);
+
+  return root;
+}
+
 
 void TreeParentSpread(Node * root){
   
@@ -312,3 +355,82 @@ void TreeClean(Node * root){
   free(root);
 }
 
+
+char * hex2bin4(char hex){
+  switch (hex){
+    case '0':
+      return "0000";
+    case '1':
+      return "0001";
+    case '2':
+      return "0010";
+    case '3':
+      return "0011";
+    case '4':
+      return "0100";
+    case '5':
+      return "0101";
+    case '6':
+      return "0110";
+    case '7':
+      return "0111";
+    case '8':
+      return "1000";
+    case '9':
+      return "1001";
+    case 'a':
+      return "1010";
+    case 'b':
+      return "1011";
+    case 'c':
+      return "1100";
+    case 'd':
+      return "1101";
+    case 'e':
+      return "1110";
+    case 'f':
+      return "1111";
+  }
+  return "";
+}
+
+void insert_block(char *px, char block[4], int b){
+  int j;
+  /*printf("blockIN: ");
+  for(j = 0; j<b; j++)
+    printf("%c",block[j]);
+  printf("\n");*/
+
+  for(j = 0; j < 4-b; j++)
+    strcat(px,"0000");
+  for(j = 0; j < b; j++)
+    strcat(px, hex2bin4(block[j]));
+}
+
+char *hex2binv6(char *px){
+  int i, b, j;
+  char block[4];
+  char *bin;
+  int len;
+
+  bin = (char*) malloc(sizeof(char) * 129);
+  len = strlen(px);
+
+  b = 0;
+  for(i = 0; i < len; i++){
+    if(px[i] == ':'){
+      insert_block(bin,block,b);
+      b = 0;
+      if(px[i+1] == ':'){
+        for(j = strlen(bin); j < 128; j++)
+          bin[j] = '0';
+        bin[128] = '\0';
+        return bin;
+      } 
+    } else{
+      block[b] = px[i];
+      b++;
+    }
+  }
+  return bin;
+}

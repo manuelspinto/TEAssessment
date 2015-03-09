@@ -22,11 +22,17 @@ void search_do(int opt, char** argv, FILE *fp){
 				search_address_space_statistics(fp);
 			break;
 		case 2 :
-			search_prepare_data(fp,argv[2]);
+			if(ip_version == '6')
+				search_prepare_data_ipv6(fp,argv[2]);
+			else
+				search_prepare_data(fp,argv[2]);
 			break;
 		case 3 :
 			printf("Building Prefix Tree...");
-			root = BuildPrefixTree(fp);
+			if(ip_version == '6')
+				root = BuildPrefixTree_ipv6(fp);
+			else
+				root = BuildPrefixTree(fp);
 			printf("done!\nSpreading Parent Information...");
 			TreeParentSpread(root);
 			printf("done!\n");

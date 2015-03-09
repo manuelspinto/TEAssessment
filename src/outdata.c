@@ -7,7 +7,7 @@
 void search_prepare_data(FILE *fp, char* fname){
 	int i;
 
-	char *dir_rib_out = "rib_out/";
+	char *dir_rib_out = "rib_out/ipv4/";
 	char fname_out[128];
 	char fname_aux[128];
 	char buff[BUFF_SIZE];
@@ -64,6 +64,71 @@ void search_prepare_data(FILE *fp, char* fname){
 	printf("done!\nOutput file: '%s'\n",fname_out);
 
 	for(i = 0; i < COLL_SIZE ; i++)
+		file_close(fp_collector[i]);
+
+	return;
+}
+
+void search_prepare_data_ipv6(FILE *fp, char* fname){
+	int i;
+
+	char *dir_rib_out = "rib_out/ipv6/";
+	char fname_out[128];
+	char fname_aux[128];
+	char buff[BUFF_SIZE];
+	FILE *fp_out;
+	FILE *fp_collector[36];
+	char entry;
+	char as_col[AS_SIZE],as_nei[AS_SIZE],as_ori[AS_SIZE];
+	char px[40], mask[10];
+	int stat = 0;
+	int as_entry = -1;
+	strcpy(fname_out,fname);
+	strcat(fname_out,".out.txt");
+	fix_path(fname_out,dir_rib_out);
+
+	fp_out = fopen(fname_out,"w");
+	if(fp_out == NULL){
+		fprintf(stderr,"Error: cannot open file '%s'\n",fname_out);exit(3);}
+
+	for(i = 0; i < COLL_SIZE_IPV6; i++){
+		strcpy(fname_aux,fname);
+		strcat(fname_aux,".");
+		strcat(fname_aux,collector_asn_ipv6[i]);
+		strcat(fname_aux,".txt");
+		fix_path(fname_aux,dir_rib_out);
+		fp_collector[i] = fopen(fname_aux,"w");
+		if(fp_collector[i] == NULL){
+			fprintf(stderr,"Error: cannot open file '%s'\n",fname_aux);exit(3);}
+	}
+
+	printf("Preparing data...");
+	while(fgets(buff, sizeof(buff), fp) != NULL){
+		entry = buff[0];
+		if(entry == 'P' || (entry == 'A' && buff[1] == 'S')){
+			fputs(buff, fp_out);
+			if (entry == 'P'){
+				get_px_and_mask(buff,&px[0],&mask[0]);
+			} else {
+				stat = get_asns(buff,&as_ori[0],&as_col[0],&as_nei[0]);
+				as_entry = get_as_entry_ipv6(as_col);
+				getNeighbor(buff,&as_nei[0]);
+				if(stat == 0 && as_entry != -1){
+					fprintf(fp_collector[as_entry],"%c %d %d %s %s %s %s %s\n"
+														  ,checkPrepending(buff)
+														  ,checkPathLength(buff)
+														  ,checkHopLength(buff)
+														  ,as_col,as_nei,as_ori,px,mask);
+				}
+				fputs("\n", fp_out);
+			}
+		}
+	}
+
+
+	printf("done!\nOutput file: '%s'\n",fname_out);
+
+	for(i = 0; i < COLL_SIZE_IPV6 ; i++)
 		file_close(fp_collector[i]);
 
 	return;
@@ -207,10 +272,35 @@ int get_asns(char *aspath, char *as_ori, char *as_col, char *as_nei){
 	return 0;
 }
 
+char *getCollector(char *aspath){
+	int i, j;
+	char aux[AS_SIZE];
+	char *as_col;
+
+	as_col = (char*) malloc(sizeof(char) * AS_SIZE);
+	as_col[0] = '\0';
+
+	for(i = 8, j = 0; i < (strlen(aspath)-1);i++, j++){
+		if(aspath[i] == ' '){
+			aux[j] = '\0';
+			strcpy(as_col,aux);
+			return as_col;
+		}else
+			aux[j] = aspath[i];
+	}
+
+	return as_col;
+}
+
 void getNeighbor(char *aspath, char *nei){
 	char aux[AS_SIZE];
 	int len, cnt, stop, idiff, diff, over;
 	int i, i2, j;
+
+	if(checkHopLength(aspath) == 2){
+		strcpy(nei,getCollector(aspath));
+		return;
+	}
 
 	len = strlen(aspath);
 
@@ -257,6 +347,15 @@ int get_as_entry(char *asn){
 
 	for(i = 0; i < COLL_SIZE ; i++)
 		if(strcmp(asn,collector_asn[i]) == 0)
+			return i;
+	return -1;
+}
+
+int get_as_entry_ipv6(char *asn){
+	int i;
+
+	for(i = 0; i < COLL_SIZE_IPV6 ; i++)
+		if(strcmp(asn,collector_asn_ipv6[i]) == 0)
 			return i;
 	return -1;
 }
