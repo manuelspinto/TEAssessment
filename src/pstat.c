@@ -29,3 +29,5 @@ void search_prefix_type_statistics(Node *root){
 
 	return;
 }
+
+

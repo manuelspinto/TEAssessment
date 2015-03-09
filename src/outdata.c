@@ -77,7 +77,7 @@ void search_prepare_data_ipv6(FILE *fp, char* fname){
 	char fname_aux[128];
 	char buff[BUFF_SIZE];
 	FILE *fp_out;
-	FILE *fp_collector[36];
+	FILE *fp_collector[17];
 	char entry;
 	char as_col[AS_SIZE],as_nei[AS_SIZE],as_ori[AS_SIZE];
 	char px[40], mask[10];

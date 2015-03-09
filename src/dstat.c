@@ -68,7 +68,7 @@ void search_deaggregation_length_statistics(Node *root){
   
   printf("#worse: %d (%.2lf%%)\n",worse,(((double)worse)/((double)deag)) * 100);
   printf("#equal: %d (%.2lf%%)\n",lencount[LEN_OFFSET],(((double)lencount[LEN_OFFSET])/((double)deag)) * 100);
-  printf("#better: %d (%.2lf%%)\n",worse,(((double)better)/((double)deag)) * 100);
+  printf("#better: %d (%.2lf%%)\n",better,(((double)better)/((double)deag)) * 100);
 
   free(lencount);
 
