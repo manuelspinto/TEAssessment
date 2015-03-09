@@ -13,3 +13,5 @@
 extern char collector_asn[36][10];
 extern char collector_px[36][16];
 
+extern char ip_version;
+

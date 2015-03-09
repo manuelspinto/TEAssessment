@@ -16,6 +16,7 @@ Node * NodeNew(){
  	new->rc = NULL;
   new->child = NULL;
   new->nnei = 0;
+  new->nneiP = 0;
 
   return new;
 }
@@ -201,6 +202,9 @@ Node *BuildPrefixTree(FILE *fp){
   char as_ori[AS_SIZE];
   char as_nei[AS_SIZE];
   char as_col[AS_SIZE];
+  char prep;
+  int  plen;
+  int  hlen;
 
   Line line;
   nInfo n_info;
@@ -212,8 +216,11 @@ Node *BuildPrefixTree(FILE *fp){
       buff[strlen(buff)-1] = '\0';
 
     
-    sscanf(buff,"%s %s %s %s %s", as_col, as_nei, as_ori, px, mask);
+    sscanf(buff,"%c %d %d %s %s %s %s %s",&prep, &plen, &hlen, as_col, as_nei, as_ori, px, mask);
 
+    n_info.prep = prep;
+    n_info.plen = plen;
+    n_info.hlen = hlen;
     strcpy(n_info.col, as_col);
     strcpy(n_info.nei, as_nei);
     strcpy(n_info.ori, as_ori);
@@ -256,7 +263,7 @@ void TreeParentSpread(Node * root){
 }
 
 
-void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx){
+void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx, int *prepx){
   int i = 0;
 
   (*index)++;
@@ -264,6 +271,9 @@ void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int 
     for(i = (*index); i < 32 ; i++)
       str[i] = '0';
     str[32] = '\0';
+
+    if(root->info.prep == 'P')
+      (*prepx)++;
 
     if(strcmp(p->asn,"-1") == 0) {
       if(root->lc != NULL || root->rc != NULL)
@@ -280,12 +290,12 @@ void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int 
   
   if(root->lc != NULL){
     str[*index] = '0';
-    TablePrint(root->lc, root, str, index, totpx, delpx, deapx, lonpx, toppx);
+    TablePrint(root->lc, root, str, index, totpx, delpx, deapx, lonpx, toppx, prepx);
   }
 
   if(root->rc != NULL){
     str[*index] = '1';
-    TablePrint(root->rc, root, str, index, totpx, delpx, deapx, lonpx, toppx);
+    TablePrint(root->rc, root, str, index, totpx, delpx, deapx, lonpx, toppx, prepx);
   }
   (*index)--;
   

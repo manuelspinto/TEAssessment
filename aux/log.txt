@@ -1,0 +1,37 @@
+Manuels-MBP:te_assessment masp$ ./bin/rv ../data/rib_out/rib.20141007.2200.txt.200130.txt --stat
+File: '../data/rib_out/rib.20141007.2200.txt.200130.txt'
+Building Prefix Tree...done!
+Spreading Parent Information...done!
+Help:	p - Prefix Type Statistics
+	n - Neighbor Statistics
+
+	h - Show help
+	e - exit
+:p
+
+
+TOTAL: 506612
+
+TOP: 31002			(6.12)
+DEAGGREGATED: 184955		(36.51)
+DELEGATED: 68532		(13.53)
+LONELY: 222123			(43.84)
+
+::n
+3573: 170.252.0.0/16
+#Top prefixes: 28207
+1: 16259
+2: 9593
+3: 1778
+4: 387
+5: 99
+6: 48
+7: 16
+8: 11
+9: 8
+10: 3
+13: 1
+14: 2
+15: 1
+24: 1
+::

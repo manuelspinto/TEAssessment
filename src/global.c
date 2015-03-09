@@ -1,5 +1,7 @@
 #include "global.h"
 
+char ip_version;
+
 char collector_asn[36][10] = { "202018",
 							  "200130",
 							  "2914",

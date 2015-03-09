@@ -47,8 +47,12 @@ void search_prepare_data(FILE *fp, char* fname){
 			} else {
 				stat = get_asns(buff,&as_ori[0],&as_col[0],&as_nei[0]);
 				as_entry = get_as_entry(as_col);
+				getNeighbor(buff,&as_nei[0]);
 				if(stat == 0 && as_entry != -1){
-					fprintf(fp_collector[as_entry],"%s %s %s %s %s\n"
+					fprintf(fp_collector[as_entry],"%c %d %d %s %s %s %s %s\n"
+														  ,checkPrepending(buff)
+														  ,checkPathLength(buff)
+														  ,checkHopLength(buff)
 														  ,as_col,as_nei,as_ori,px,mask);
 				}
 				fputs("\n", fp_out);
@@ -112,6 +116,71 @@ void fix_path(char *fullpath, char *path){
 	strcat(fullpath,fname);
 }
 
+int checkPathLength(char *aspath){
+	int pathlen = 0;
+	int len, i;
+
+	len = strlen(aspath);
+
+	for(i = 8; i < len; i++)
+		if(aspath[i] == ' ' || aspath[i] == '\n')
+			pathlen++;
+
+	return pathlen;
+}
+
+int checkHopLength(char *aspath){
+	int hoplen = 0;
+	char stored[50];
+	char current[50];
+	int len, i, c;
+
+	len = strlen(aspath);
+
+	c = 0;
+	stored[0] = '\0';
+
+	for(i = 8; i < len; i++){
+		if(aspath[i] == ' ' || aspath[i] == '\n'){
+			current[c] = '\0';
+			if(strcmp(current,stored) != 0){
+				hoplen++;
+				strcpy(stored,current);
+			}
+			c = 0;
+		}else{
+			current[c] = aspath[i];
+			c++;
+		}
+	}
+
+	return hoplen;
+}
+
+char checkPrepending(char *aspath){
+	char aux[AS_SIZE];
+	char asncmp[20][AS_SIZE];
+	int i, j, k, ias, len;
+
+	ias = 0;
+
+	len = strlen(aspath);
+
+	for(i = 8, j = 0; i < len; i++,j++){
+		if(aspath[i] == ' ' || aspath[i] == '\n'){
+			aux[j] = '\0';
+			for(k = 0; k < ias ; k++)
+				if(strcmp(aux,asncmp[k]) == 0)
+					return 'P';
+			strcpy(asncmp[k],aux);
+			ias++;
+			j = -1;
+		}else
+			aux[j] = aspath[i];
+	}
+	return 'N';
+} 
+
 int get_asns(char *aspath, char *as_ori, char *as_col, char *as_nei){
 	int i, j;
 	int c = 0;
@@ -138,13 +207,57 @@ int get_asns(char *aspath, char *as_ori, char *as_col, char *as_nei){
 	return 0;
 }
 
+void getNeighbor(char *aspath, char *nei){
+	char aux[AS_SIZE];
+	int len, cnt, stop, idiff, diff, over;
+	int i, i2, j;
+
+	len = strlen(aspath);
+
+	stop = len-1;
+	cnt = 0;
+	idiff = 0;
+	diff = 0;
+	over = 0;
+
+	for(i = len-1; i > 7; i--){
+		if(aspath[i] == ' '){
+			for(i2 = i+1, j = 0; i2 < stop; i2++, j++)
+				aux[j] = aspath[i2];
+			aux[j] = '\0'; 
+			if(cnt == 0)
+				strcpy(nei,aux);
+			else if(strcmp(nei,aux) != 0)
+				diff++;
+
+
+			if(cnt==1 && diff == 0){
+				idiff = 1;
+				over = 1;
+			}
+			else if(cnt == 2 && diff == 2)
+				return;
+			else if(cnt == 2 && diff == 1 && over == 0)
+				idiff = 2;
+
+			if((idiff == 1 && diff == 1) || (idiff == 2 && diff == 2)){
+				strcpy(nei,aux);
+				return;
+			}
+
+			strcpy(nei,aux);
+			stop = i;
+			cnt++;
+		}
+	}
+}
+
 int get_as_entry(char *asn){
 	int i;
 
 	for(i = 0; i < COLL_SIZE ; i++)
 		if(strcmp(asn,collector_asn[i]) == 0)
 			return i;
-	
 	return -1;
 }
 

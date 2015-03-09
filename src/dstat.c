@@ -15,19 +15,64 @@ void search_neighbor_deaggregation_statistics(Node *root){
 
 	for(i = 0; i < 50; i++)
 		ncount[i] = 0;
+	
 
 	ChildSpread(root);
 
 	getStat(root,&top, ncount);
 
-	printf("#Top prefixes: %d\n",top);
+	printf("#Top prefixes: %d\n\n",top);
+	printf("#nNei\t#nTop\t%%nTop\n");
 	for(i= 0 ; i<50; i++)
 		if(ncount[i] != 0)
-			printf("%d: %d\n",i+1,ncount[i]);
+			printf("%d\t%d\t(%.2lf%%)\n",i+1,ncount[i],(((double)ncount[i])/((double)top)) * 100);
 
 	free(ncount);
 
 	return;
+}
+
+void search_deaggregation_length_statistics(Node *root){
+  int i;
+  int *lencount;
+  int top = 0;
+  int deag = 0;
+  int worse = 0;
+  int better = 0;
+
+  lencount = (int*) malloc(sizeof(int)*(2*LEN_OFFSET+1));
+
+  for(i = 0; i < (2*LEN_OFFSET+1); i++)
+    lencount[i] = 0;
+  
+
+  ChildSpread(root);
+
+  getStatLen(root,&top,&deag, lencount);
+
+  printf("\n** Prefix length statistics **\n\n");
+  printf("#Top prefixes: %d\t#Deag prefixes: %d\n\n",top,deag);
+  printf("#nhP-nhC\t#nDeag%%nDeag\n");
+  for(i= 0 ; i< (2*LEN_OFFSET+1); i++)
+    if(lencount[i] != 0)
+      printf("%d\t\t%d\t(%.2lf%%)\n",-LEN_OFFSET + i,lencount[i],(((double)lencount[i])/((double)deag)) * 100);
+  printf("\n\n");
+
+  for(i = 0 ; i < LEN_OFFSET; i++)
+    if(lencount[i] != 0)
+      worse +=lencount[i];
+
+  for(i = LEN_OFFSET + 1 ; i < (2*LEN_OFFSET+1); i++)
+    if(lencount[i] != 0)
+      better +=lencount[i];
+  
+  printf("#worse: %d (%.2lf%%)\n",worse,(((double)worse)/((double)deag)) * 100);
+  printf("#equal: %d (%.2lf%%)\n",lencount[LEN_OFFSET],(((double)lencount[LEN_OFFSET])/((double)deag)) * 100);
+  printf("#better: %d (%.2lf%%)\n",worse,(((double)better)/((double)deag)) * 100);
+
+  free(lencount);
+
+  return;
 }
 
 void ChildSpread(Node *root){
@@ -56,18 +101,34 @@ void ChildSpread(Node *root){
 
 void getStat(Node *root, int *top, int *ncount){
 
-  if(root->px == 1 && root->child != NULL)
-    if(root->parent == root && root->nnei != 0){
+  if(root->px == 1 && root->parent == root && root->child != NULL){
     	(*top)++;
     	ncount[root->nnei-1]++;
-    	if(root->nnei == 24)
-    		printf("%s: %s/%d\n",root->asn,root->info.px,root->info.mask);
     }
   
   if(root->lc != NULL)
     getStat(root->lc, top, ncount);
   if(root->rc != NULL)
     getStat(root->rc, top, ncount);
+
+  return;
+}
+
+void getStatLen(Node *root, int *top, int *deag, int *lencount){
+  Child *aux;
+
+  if(root->px == 1 && root->parent == root && root->child != NULL){
+      (*top)++;
+      for(aux = root->child; aux != NULL; aux = aux->next){
+        lencount[LEN_OFFSET + (root->info.hlen - aux->node->info.hlen)]++;
+        (*deag)++;
+      }
+  }
+  
+  if(root->lc != NULL)
+    getStatLen(root->lc, top, deag, lencount);
+  if(root->rc != NULL)
+    getStatLen(root->rc, top, deag, lencount);
 
   return;
 }
@@ -135,6 +196,8 @@ void printInfo(nInfo i){
 	printf("\tori: %s\n",i.ori);
 	printf("\tpx:  %s\n",i.px);
 	printf("\tmask: %d\n",i.mask);
+  printf("\tprep: %c\n",i.prep);
+  printf("\tplen: %d\n\n",i.plen);
 }
 
 void printNeighbor(Neighbor *n){

@@ -16,10 +16,13 @@ void search_do(int opt, char** argv, FILE *fp){
 
 	switch(opt){
 		case 1 :
-			search_address_space_statistics(fp);
+			if(ip_version == '6')
+				search_address_space_statistics_ipv6(fp);
+			else
+				search_address_space_statistics(fp);
 			break;
 		case 2 :
-			search_prepare_data(fp,argv[1]);
+			search_prepare_data(fp,argv[2]);
 			break;
 		case 3 :
 			printf("Building Prefix Tree...");
@@ -31,7 +34,7 @@ void search_do(int opt, char** argv, FILE *fp){
 			while(1){
 				printf(":");
 				scanf("%c",&s_opt);
-				if(s_opt == 'e')
+				if(s_opt == 'q')
 					break;
 				switch(s_opt){
 					case 'p':
@@ -39,6 +42,9 @@ void search_do(int opt, char** argv, FILE *fp){
 						break;
 					case 'n':
 						search_neighbor_deaggregation_statistics(root);
+						break;
+					case 'l':
+						search_deaggregation_length_statistics(root);
 						break;
 					case 'h':
 						showHelp();
@@ -59,9 +65,10 @@ void search_do(int opt, char** argv, FILE *fp){
 void showHelp(void){
 	printf("Help:");
 	printf("\tp - Prefix Type Statistics\n");
-	printf("\tn - Neighbor Statistics\n\n");
+	printf("\tn - Neighbor Statistics\n");
+	printf("\tl - Path length Statistics\n\n");
 	printf("\th - Show help\n");
-	printf("\te - exit\n");
+	printf("\tq - quit\n");
 }
 
 

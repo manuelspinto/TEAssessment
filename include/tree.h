@@ -18,6 +18,9 @@ typedef struct node_info{
 	char ori[AS_SIZE];
 	char px[33];
 	int mask;
+	char prep;
+  	int plen; /* path length */
+  	int hlen; /* hop length */
 } nInfo;
 
 typedef struct child{
@@ -28,7 +31,8 @@ typedef struct child{
 typedef struct node{
   char asn[128];
   int px;
-  int nnei;
+  int nnei; /* Number of neighbhors */
+  int nneiP;
   struct node *parent;
   struct neighbor *neighbor;
   struct node_info info;
@@ -45,7 +49,7 @@ char * bin2dec(char *bin);
 void TreeInsert(Node * root, Line l, nInfo info);
 void TreeSpread(Node * root);
 void TreeParentSpread(Node * root);
-void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx);
+void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx, int *prepx);
 void TreeClean(Node * root);
 
 Node *BuildPrefixTree(FILE *fp);
