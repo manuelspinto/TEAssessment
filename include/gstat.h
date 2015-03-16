@@ -9,5 +9,5 @@ void getStatD(Node *root, int *top, int *nfreq);
 
 int getLvl(double f);
 
-#define STEP 0.25
+#define STEP 0.5
 #define N_LEVEL 100

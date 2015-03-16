@@ -65,6 +65,9 @@ void search_do(int opt, char** argv, FILE *fp){
 					case 't':
 						printTree(root);
 						break;
+					case 'd':
+						search_deaggregation_statistics(root);
+						break;
 					case 'h':
 						showHelp();
 						break;
@@ -141,6 +144,7 @@ void showHelp(void){
 	printf("\tp - Prefix Type Statistics\n");
 	printf("\tn - Neighbor Statistics\n");
 	printf("\tl - Path length Statistics\n");
+	printf("\td - Deaggregation Level\n");
 	printf("\tt - PrintTopTree\n\n");
 	printf("\th - Show help\n");
 	printf("\tq - quit\n");

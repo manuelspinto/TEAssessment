@@ -21,16 +21,16 @@ void search_deaggregation_statistics(Node *master){
 	getStatD(master, &top, nfreq);
 
 	for(i = 0; i < N_LEVEL ;i++){
-		printf("<%.2lf\t%d\t%.2lf%%\n",STEP*(i+1),nfreq[i],100*((double) ((double)nfreq[i]/ ((double) top))));
+		printf("<=%.2lf\t%d\t%.2lf%%\n",STEP*(i+1),nfreq[i],100*((double) ((double)nfreq[i]/ ((double) top))));
 		tot += nfreq[i];
 	}
-	printf("\n\nTot: %.2f%%\n",100*((double) (((double)tot)/ ((double) top))));
+	printf("\n\nTot: %d\t%.2f%%\n",top,100*((double) (((double)tot)/ ((double) top))));
 
 }
 
 void getStatD(Node *root, int *top, int *nfreq){
 
-  if(root->px == 1 && root->parent == root && root->child != NULL){
+  if(root->px == 1 && root->parent == root && root->child != NULL && root->nnei > 1){
     	(*top)++;
     	nfreq[getLvl((double) ( ((double) root->nchild) / ((double) root->nnei) ) )]++;
     }
@@ -46,8 +46,12 @@ void getStatD(Node *root, int *top, int *nfreq){
 int getLvl(double f){
 	int i;
 
+	/*for(i = 0; i < N_LEVEL; i++)
+		if(f <= STEP*(i+1))
+			return i;*/
+
 	for(i = 0; i < N_LEVEL; i++)
-		if(f < STEP*(i+1))
+		if(f <= STEP*(i+1))
 			return i;
 	
 	return -1;
