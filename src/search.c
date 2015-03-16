@@ -9,6 +9,7 @@
 #include "outdata.h"
 #include "pstat.h"
 #include "dstat.h"
+#include "gstat.h"
 
 void search_do(int opt, char** argv, FILE *fp){
 	Node *root;
@@ -40,6 +41,7 @@ void search_do(int opt, char** argv, FILE *fp){
 				root = BuildPrefixTree(fp);
 			printf("done!\nSpreading Parent Information...");
 			TreeParentSpread(root);
+			ChildSpread(root);
 			printf("done!\n");
 			showHelp();
 			while(1){
@@ -49,13 +51,19 @@ void search_do(int opt, char** argv, FILE *fp){
 					break;
 				switch(s_opt){
 					case 'p':
-						search_prefix_type_statistics(root);
+						if(ip_version == '6')
+							search_prefix_type_statistics_ipv6(root);
+						else
+							search_prefix_type_statistics(root);
 						break;
 					case 'n':
 						search_neighbor_deaggregation_statistics(root);
 						break;
 					case 'l':
 						search_deaggregation_length_statistics(root);
+						break;
+					case 't':
+						printTree(root);
 						break;
 					case 'h':
 						showHelp();
@@ -69,51 +77,55 @@ void search_do(int opt, char** argv, FILE *fp){
 		case 4 :
 			getCollectorFp(fp_ipv4, argv[2]);
 
-			printf("Building Prefixes Tree (Average)...");
+			printf("Building Prefixes Tree...");
 			if(ip_version == '6'){
 				for(i = 0; i < 17 ; i++){
 					root_ipv6[i] = BuildPrefixTree_ipv6(fp_ipv6[i]);
 					TreeParentSpread(root_ipv6[i]);
-					printf("%d ",i);
+					ChildSpread(root_ipv6[i]);
 				}
 			}
 			else{
 				for(i = 0; i < 36 ; i++){
 					root_ipv4[i] = BuildPrefixTree(fp_ipv4[i]);
 					TreeParentSpread(root_ipv4[i]);
+					ChildSpread(root_ipv4[i]);
+					fprintf(stdout,":%.0lf%%\n",(double)(((double)i)/ 36) * 100);
 				}
-			}	
+			}
 			printf("done!\n");
-			showHelp();
+			printf("Filling Master root...\n");
+			masterFill(root_ipv4);
+			printf("done\n");
+			showHelpG();
 			while(1){
 				printf(":");
 				scanf("%c",&s_opt);
 				if(s_opt == 'q')
 					break;
 				switch(s_opt){
-					case 'p':
-						search_prefix_type_statistics(root_ipv4[0]);
-						break;
 					case 'n':
 						search_neighbor_deaggregation_statistics(root_ipv4[0]);
 						break;
-					case 'l':
-						search_deaggregation_length_statistics(root_ipv4[0]);
+					case 'd':
+						search_deaggregation_statistics(root_ipv4[0]);
 						break;
 					case 'h':
-						showHelp();
+						showHelpG();
 						break;
 					default:
 						break;
 				}
 			}
-			printf("Cleaning Tree...\n");
+			printf("Cleaning Trees...\n");
 			if(ip_version == '6')
 				for(i = 0; i < 17 ; i++)
 					TreeClean(root_ipv6[i]);
 			else
-				for(i = 0; i < 36 ; i++)
+				for(i = 0; i < 36 ; i++){
 					TreeClean(root_ipv4[i]);
+					fprintf(stdout,":%.0lf%%\n",(double)(((double)i)/ 36) * 100);
+				}
 			printf("done!\n");
 			break;
 
@@ -128,7 +140,15 @@ void showHelp(void){
 	printf("Help:");
 	printf("\tp - Prefix Type Statistics\n");
 	printf("\tn - Neighbor Statistics\n");
-	printf("\tl - Path length Statistics\n\n");
+	printf("\tl - Path length Statistics\n");
+	printf("\tt - PrintTopTree\n\n");
+	printf("\th - Show help\n");
+	printf("\tq - quit\n");
+}
+void showHelpG(void){
+	printf("Help:");
+	printf("\tn - Neighbor Statistics\n");
+	printf("\td - Deaggregation Level\n\n");
 	printf("\th - Show help\n");
 	printf("\tq - quit\n");
 }

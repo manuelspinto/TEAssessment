@@ -17,6 +17,7 @@ Node * NodeNew(){
   new->child = NULL;
   new->nnei = 0;
   new->nneiP = 0;
+  new->nchild = 0;
 
   return new;
 }
@@ -306,6 +307,52 @@ void TreeParentSpread(Node * root){
 }
 
 
+void TopTreePrint(Node * root, Node * p, int *ret, int *topcnt){
+  int cnt = 0;
+
+  if(root->px == 1){
+
+    if(strcmp(p->asn,"-1") == 0) {
+      if(root->lc != NULL || root->rc != NULL){
+        /*(*toppx)++;*/
+        (*topcnt)++;
+        if((*topcnt) < 100){
+          printf("\nFATHER: (%s)%s/%d\n", root->asn, root->info.px, root->info.mask);
+          if((*topcnt) == 99)
+          cnt = 1;
+        }
+      }
+      else
+        /*(*lonpx)++;*/
+        return;
+    }else{
+      if((*topcnt) <100)
+        printf("%d:(%s)%s/%d\t%s\n",root->info.mask - root->parent->info.mask, root->asn, root->info.px, root->info.mask, root->info.nei);
+    }
+  }
+
+
+  if((*ret) == 1)
+    return;
+  
+  if(root->lc != NULL)
+    TopTreePrint(root->lc, root, ret, topcnt);
+  
+
+  if((*ret) == 1)
+    return;
+
+  if(root->rc != NULL)
+    TopTreePrint(root->rc, root, ret, topcnt);
+  
+  
+  if(cnt == 1)
+    (*ret) =  1;
+
+  return;
+}
+
+
 void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx, int *prepx){
   int i = 0;
 
@@ -339,6 +386,45 @@ void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int 
   if(root->rc != NULL){
     str[*index] = '1';
     TablePrint(root->rc, root, str, index, totpx, delpx, deapx, lonpx, toppx, prepx);
+  }
+  (*index)--;
+  
+  return;
+}
+
+void TablePrint_ipv6(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx, int *prepx){
+  int i = 0;
+
+  (*index)++;
+  if(root->px == 1){
+    for(i = (*index); i < 128 ; i++)
+      str[i] = '0';
+    str[128] = '\0';
+
+    if(root->info.prep == 'P')
+      (*prepx)++;
+
+    if(strcmp(p->asn,"-1") == 0) {
+      if(root->lc != NULL || root->rc != NULL)
+        (*toppx)++;
+      else
+        (*lonpx)++;
+    }else{
+      if(asncmp(p->asn,root->asn) == 0)
+        (*deapx)++;
+      else
+        (*delpx)++; 
+    }
+  }
+  
+  if(root->lc != NULL){
+    str[*index] = '0';
+    TablePrint_ipv6(root->lc, root, str, index, totpx, delpx, deapx, lonpx, toppx, prepx);
+  }
+
+  if(root->rc != NULL){
+    str[*index] = '1';
+    TablePrint_ipv6(root->rc, root, str, index, totpx, delpx, deapx, lonpx, toppx, prepx);
   }
   (*index)--;
   

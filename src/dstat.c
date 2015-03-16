@@ -15,9 +15,6 @@ void search_neighbor_deaggregation_statistics(Node *root){
 
 	for(i = 0; i < 50; i++)
 		ncount[i] = 0;
-	
-
-	ChildSpread(root);
 
 	getStat(root,&top, ncount);
 
@@ -44,9 +41,6 @@ void search_deaggregation_length_statistics(Node *root){
 
   for(i = 0; i < (2*LEN_OFFSET+1); i++)
     lencount[i] = 0;
-  
-
-  ChildSpread(root);
 
   getStatLen(root,&top,&deag, lencount);
 
@@ -83,6 +77,7 @@ void ChildSpread(Node *root){
     }
     else{
     	root->parent->child = ChildNew(root,root->parent->child);
+      root->parent->nchild++;
     	if(check_neighbor(root->parent->neighbor,root->info.nei) == 0){
     		root->parent->neighbor = neighborNew(root->info.nei,root->parent->neighbor);
     		root->parent->nnei++;
@@ -233,5 +228,6 @@ int cmp_info(nInfo a, nInfo b){
 	else
 		return 0;
 }
+
 
 

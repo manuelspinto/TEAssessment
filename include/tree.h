@@ -32,6 +32,7 @@ typedef struct node{
   char asn[128];
   int px;
   int nnei; /* Number of neighbhors */
+  int nchild;
   int nneiP;
   struct node *parent;
   struct neighbor *neighbor;
@@ -54,7 +55,11 @@ void TreeInsert(Node * root, Line l, nInfo info);
 void TreeSpread(Node * root);
 void TreeParentSpread(Node * root);
 void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx, int *prepx);
+void TablePrint_ipv6(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx, int *prepx);
 void TreeClean(Node * root);
+void printTree(Node *root);
+void TopTreePrint(Node * root, Node * p, int *ret, int *topcnt);
+
 
 Node *BuildPrefixTree(FILE *fp);
 Node *BuildPrefixTree_ipv6(FILE *fp);

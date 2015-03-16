@@ -12,7 +12,7 @@ void args_print_options(void){
 	printf("\troute_views.txt\n");
 	printf("\t\t[--astat] Address Space Statistics\n");
 	printf("\t\t[--outdata] Prepare data for Traffic Engineering Analysis\n");
-	printf("\t\t[--avstat] Average statistics\n");
+	printf("\t\t[--gstat] Global statistics\n");
 	printf("\tcollector.txt\n");
 	printf("\t\t[--stat] Prefix Type Statistics\n");
 }
@@ -29,7 +29,7 @@ int args_verify(int argc, char **argv){
 		return 2;
 	else if (strcmp(argv[3],"--stat") == 0)
 		return 3;
-	else if (strcmp(argv[3],"--avstat") == 0)
+	else if (strcmp(argv[3],"--gstat") == 0)
 		return 4;
 	else{
 		printf("Not a valid option\n");
