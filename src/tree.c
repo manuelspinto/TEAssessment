@@ -18,6 +18,8 @@ Node * NodeNew(){
   new->nnei = 0;
   new->nneiP = 0;
   new->nchild = 0;
+  new->GPrep = 0;
+  new->GScop = 0;
 
   return new;
 }
@@ -316,18 +318,20 @@ void TopTreePrint(Node * root, Node * p, int *ret, int *topcnt){
       if(root->lc != NULL || root->rc != NULL){
         /*(*toppx)++;*/
         (*topcnt)++;
-        if((*topcnt) < 100){
-          printf("\nFATHER: (%s)%s/%d\n", root->asn, root->info.px, root->info.mask);
-          if((*topcnt) == 99)
-          cnt = 1;
+        if((*topcnt) % 100 == 0){
+
+          printf("\nFATHER:\n\t(%s)\t%s/%d\t%s\t%c\n", root->asn, root->info.px, root->info.mask, root->info.nei, root->info.prep);
+          printf("CHILDREN:\n");
+          if((*topcnt)%100 == 0 && (*topcnt)/100 == 99)
+            cnt = 1;
         }
       }
       else
         /*(*lonpx)++;*/
         return;
     }else{
-      if((*topcnt) <100)
-        printf("%d:(%s)%s/%d\t%s\n",root->info.mask - root->parent->info.mask, root->asn, root->info.px, root->info.mask, root->info.nei);
+      if((*topcnt)%100 == 0 && (*topcnt)/100 <100)
+        printf("%d\t(%s)\t%s/%d\t%s\t%c\n",root->info.mask - root->parent->info.mask, root->asn, root->info.px, root->info.mask, root->info.nei, root->info.prep);
     }
   }
 
@@ -353,7 +357,9 @@ void TopTreePrint(Node * root, Node * p, int *ret, int *topcnt){
 }
 
 
-void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx, int *prepx){
+void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx
+              , int *delpx, int *deltpx, int *deapx, int *lonpx, int *toppx, int *topdea
+              , int *prepx, int *preptype){
   int i = 0;
 
   (*index)++;
@@ -366,26 +372,44 @@ void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int 
       (*prepx)++;
 
     if(strcmp(p->asn,"-1") == 0) {
-      if(root->lc != NULL || root->rc != NULL)
-        (*toppx)++;
-      else
+      if(root->lc != NULL || root->rc != NULL){
+        if(root->child != NULL){
+          (*topdea)++;
+          if(root->info.prep == 'P') preptype[5]++;
+        }else{
+          (*toppx)++;
+          if(root->info.prep == 'P') preptype[0]++;
+        }
+      }
+      else{
         (*lonpx)++;
+        if(root->info.prep == 'P') preptype[1]++;
+      }
     }else{
-      if(asncmp(p->asn,root->asn) == 0)
+      if(asncmp(p->asn,root->asn) == 0){
         (*deapx)++;
-      else
-        (*delpx)++; 
+        if(root->info.prep == 'P') preptype[2]++;
+      }
+      else{
+        if(root->child != NULL){
+          (*deltpx)++;
+          if(root->info.prep == 'P') preptype[3]++;
+        }else{
+          (*delpx)++; 
+          if(root->info.prep == 'P') preptype[4]++;
+        }
+      }
     }
   }
   
   if(root->lc != NULL){
     str[*index] = '0';
-    TablePrint(root->lc, root, str, index, totpx, delpx, deapx, lonpx, toppx, prepx);
+    TablePrint(root->lc, root, str, index, totpx, delpx, deltpx, deapx, lonpx, toppx, topdea, prepx, preptype);
   }
 
   if(root->rc != NULL){
     str[*index] = '1';
-    TablePrint(root->rc, root, str, index, totpx, delpx, deapx, lonpx, toppx, prepx);
+    TablePrint(root->rc, root, str, index, totpx, delpx, deltpx, deapx, lonpx, toppx, topdea, prepx, preptype);
   }
   (*index)--;
   

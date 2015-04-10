@@ -9,24 +9,59 @@
 void search_neighbor_deaggregation_statistics(Node *root){
 	int i;
 	int *ncount;
+  int *nprep;
 	int top = 0;
 
 	ncount = (int*) malloc(sizeof(int)*50);
+  nprep = (int*) malloc(sizeof(int)*50);
 
-	for(i = 0; i < 50; i++)
+	for(i = 0; i < 50; i++){
 		ncount[i] = 0;
+    nprep[i] = 0;
+  }
 
-	getStat(root,&top, ncount);
+	getStat(root,&top, ncount, nprep);
 
 	printf("#Top prefixes: %d\n\n",top);
-	printf("#nNei\t#nTop\t%%nTop\n");
+	printf("#nNei\t#nTop\t%%nTop\t%%Prep\t%%PrepT\n");
 	for(i= 0 ; i<50; i++)
 		if(ncount[i] != 0)
-			printf("%d\t%d\t(%.2lf%%)\n",i+1,ncount[i],(((double)ncount[i])/((double)top)) * 100);
+			printf("%d\t%d\t%.2lf%%\t%.2lf%%\t%.2lf%%\n",i+1,ncount[i],(((double)ncount[i])/((double)top)) * 100,
+                                                            (((double)nprep[i])/((double)top)) * 100,
+                                                            (((double)nprep[i])/((double)ncount[i])) * 100);
 
 	free(ncount);
 
 	return;
+}
+
+void search_te_statistics(Node *root){
+  int i;
+  int *te;
+  int top =0;
+  int tetot = 0;
+
+  te = (int*) malloc(4*sizeof(int));
+
+  for(i = 0; i < 4; i++)
+    te[i] = 0;
+
+  getStatTE(root, te, &top);
+
+  printf("\ntop = %d\n\n", top);
+  printf("Scoped?\tPrep?\t#top\t%%top\n");
+  printf("NO\tNO\t%d\t%.2lf%%\n"  , te[0], (((double)te[0])/((double)top)) * 100);
+  printf("NO\tYES\t%d\t%.2lf%%\n" , te[1], (((double)te[1])/((double)top)) * 100);
+  printf("YES\tNO\t%d\t%.2lf%%\n" , te[2], (((double)te[2])/((double)top)) * 100);
+  printf("YES\tYES\t%d\t%.2lf%%\n", te[3], (((double)te[3])/((double)top)) * 100);
+
+  for(i = 1; i<4; i++)
+    tetot+=te[i];
+
+
+  printf("\nTE:\t%d\t%.2lf%%\n", tetot, (((double)tetot)/((double)top)) * 100);
+  printf("NO-TE\t%d\t%.2lf%%\n", te[0], (((double)te[0])/((double)top)) * 100);
+
 }
 
 void search_deaggregation_length_statistics(Node *root){
@@ -72,14 +107,18 @@ void search_deaggregation_length_statistics(Node *root){
 void ChildSpread(Node *root){
   if(root->px == 1){
   	if(root->parent == root){
-    	root->parent->neighbor = neighborNew(root->info.nei,NULL);
+    	root->parent->neighbor = neighborNew(root->info.nei,root->info.prep, root->neighbor);
     	root->parent->nnei++;
     }
     else{
     	root->parent->child = ChildNew(root,root->parent->child);
       root->parent->nchild++;
-    	if(check_neighbor(root->parent->neighbor,root->info.nei) == 0){
-    		root->parent->neighbor = neighborNew(root->info.nei,root->parent->neighbor);
+
+      root->neighbor = neighborNew(root->info.nei, root->info.prep, root->neighbor); /*****/
+    	
+      /* COMENT BLOCK IF PRINTING IS USED */
+      if(check_neighbor(root->parent->neighbor,root->info.nei) == 0){
+    		root->parent->neighbor = neighborNew(root->info.nei,root->info.prep,root->parent->neighbor);
     		root->parent->nnei++;
     	}
     }
@@ -94,20 +133,80 @@ void ChildSpread(Node *root){
   return;
 }
 
-void getStat(Node *root, int *top, int *ncount){
+void checkScopAndPrep(Node *root){
+  if(root->parent == root && (root->child != NULL)){
+      root->GPrep = checkPrep(root);
+      root->GScop = checkScoped(root);
+  }
+
+  if(root->lc != NULL)
+    checkScopAndPrep(root->lc);
+  if(root->rc != NULL)
+    checkScopAndPrep(root->rc);
+
+  return;
+}
+
+int checkPrep(Node *root){
+  Child *aux;
+
+  if(root->info.prep == 'P')
+    return 1;
+  for(aux=root->child; aux != NULL; aux = aux->next)
+    if(aux->node->info.prep == 'P')
+      return 1;
+  
+  return 0;
+}
+
+int checkScoped(Node *root){
+  if(root->nnei > 1)
+    return 1;
+  return 0;
+}
+
+void getStat(Node *root, int *top, int *ncount, int *nprep){
 
   if(root->px == 1 && root->parent == root && root->child != NULL){
     	(*top)++;
     	ncount[root->nnei-1]++;
-    }
+      if(root->info.prep == 'P')
+        nprep[root->nnei-1]++;
+  }
   
   if(root->lc != NULL)
-    getStat(root->lc, top, ncount);
+    getStat(root->lc, top, ncount, nprep);
   if(root->rc != NULL)
-    getStat(root->rc, top, ncount);
+    getStat(root->rc, top, ncount, nprep);
 
   return;
 }
+void getStatTE(Node *root, int *te, int *top){
+  if(root->px == 1 && root->parent == root && root->child != NULL){ /** top **/
+    (*top)++;
+    if(root->GScop == 0 && root->GPrep == 0)
+      te[0]++;
+    else {
+      if(root->GScop == 0 && root->GPrep == 1)
+        te[1]++;
+      else {
+        if(root->GScop == 1 && root->GPrep == 0)
+          te[2]++;
+        else
+          te[3]++;
+      }
+    }
+  }
+  
+  if(root->lc != NULL)
+    getStatTE(root->lc, te, top);
+  if(root->rc != NULL)
+    getStatTE(root->rc, te, top);
+
+  return;
+}
+
+
 
 void getStatLen(Node *root, int *top, int *deag, int *lencount){
   Child *aux;
@@ -199,13 +298,14 @@ void printNeighbor(Neighbor *n){
 	Neighbor *aux;
 
 	for(aux=n; aux!= NULL; aux = aux->next)
-		printf("\tnei: %s\n",aux->asn);
+		printf("\tnei: %s(%c)\n",aux->asn, aux->prep);
 }
 
-Neighbor * neighborNew(char *asn, Neighbor *next){
+Neighbor * neighborNew(char *asn, char prep,  Neighbor *next){
   Neighbor *new = (Neighbor *) malloc(sizeof(Neighbor));
 
   strcpy(new->asn, asn);
+  new->prep = prep;
   new->next = next;
   
   return new;

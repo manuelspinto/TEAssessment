@@ -93,6 +93,7 @@ void search_do(int opt, char** argv, FILE *fp){
 					root_ipv4[i] = BuildPrefixTree(fp_ipv4[i]);
 					TreeParentSpread(root_ipv4[i]);
 					ChildSpread(root_ipv4[i]);
+					checkScopAndPrep(root_ipv4[i]);
 					fprintf(stdout,":%.0lf%%\n",(double)(((double)i)/ 36) * 100);
 				}
 			}
@@ -112,6 +113,21 @@ void search_do(int opt, char** argv, FILE *fp){
 						break;
 					case 'd':
 						search_deaggregation_statistics(root_ipv4[0]);
+						break;
+					case 't':
+						printf("\n**** One collector\n");
+						search_te_statistics(root_ipv4[1]);
+						printf("\n\n****All collectors\n\n");
+						search_te_statistics(root_ipv4[0]);
+						break;
+					case 'p':
+						printf("\n**** One collector\n");
+							search_prefix_type_statistics(root_ipv4[1]);
+						printf("\n\n****All collectors\n\n");
+							search_prefix_type_statistics(root_ipv4[0]);
+						break;
+					case 's':
+						printTopTree(root_ipv4[0]);
 						break;
 					case 'h':
 						showHelpG();

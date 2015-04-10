@@ -43,6 +43,49 @@ void getStatD(Node *root, int *top, int *nfreq){
   return;
 }
 
+void printTopTree(Node *root){
+	int top = 0;
+
+	printTopPx(root,&top);
+}
+
+void printTopPx(Node *root, int *top){
+
+  if((*top)/100 == 99)
+  	return;
+
+  if(root->parent == root && root->child != NULL){
+  	(*top)++;
+  	if((*top)%100 == 0){
+	  	printf("\nFATHER:\n\t(%s)\t%s/%d\t%s\t%c\n", root->asn, root->info.px, root->info.mask, root->info.nei, root->info.prep);
+	    printNeighbor(root->neighbor);
+	    printf("CHILDREN:\n");
+	    printChildren(root);
+	}
+  }
+
+  if(root->lc != NULL)
+    printTopPx(root->lc, top);
+  if(root->rc != NULL)
+    printTopPx(root->rc, top);
+
+  return;
+}
+
+void printChildren(Node *root){
+	Child *aux;
+	Neighbor *nei;
+
+	for(aux=root->child; aux != NULL ; aux = aux->next){
+		printf("%d\t(%s)\t%s/%d\t%s\t%c", aux->node->info.mask - aux->node->parent->info.mask
+										  , aux->node->asn, aux->node->info.px, aux->node->info.mask
+										  , aux->node->info.nei, aux->node->info.prep);
+		for(nei = aux->node->neighbor; nei != NULL ; nei = nei->next)
+			printf("\t%s(%c)",nei->asn,nei->prep);
+		printf("\n");
+	}
+}
+
 int getLvl(double f){
 	int i;
 
@@ -61,10 +104,10 @@ void masterFill(Node **root){
 	int i;
 
 	for(i = 1; i < 36; i++){
-		mergeNeighbor(root[0], root[i]);
+		mergeNeighborDEA(root[0], root[i]);
+		mergeSP(root[0], root[i]);
 		fprintf(stdout,":%.0lf%%\n",(double)(((double)i)/ 36) * 100);
 	}
-
 }
 
 void mergeNeighbor(Node *master, Node *root){
@@ -84,6 +127,54 @@ void mergeNeighbor(Node *master, Node *root){
 		mergeNeighbor(master, root->rc);
 }
 
+void mergeNeighborDEA(Node *master, Node *root){
+	Node *aux = NULL;
+
+	if(root->px == 1){
+		aux = getNode(master, root);
+		if(aux != NULL && aux->px == 1)
+			updateNeighbor(aux, root->neighbor);
+	}
+
+	if(root->lc != NULL)
+		mergeNeighborDEA(master, root->lc);
+
+	if(root->rc != NULL)
+		mergeNeighborDEA(master, root->rc);
+}
+
+void mergeSP(Node *master, Node *root){
+	Node *aux;
+
+	if(root->px == 1){
+		aux = getNode(master, root);
+		if(aux != NULL && aux->px == 1) {
+			if((root->parent == root) && (root->child != NULL))
+				updateSP(aux, root);
+			else 
+				updateP(aux, root);
+		}
+	}
+
+	if(root->lc != NULL)
+		mergeSP(master, root->lc);
+
+	if(root->rc != NULL)
+		mergeSP(master, root->rc);
+}
+
+void updateP(Node *master, Node *root){
+	if(master->info.prep == 'N' && root->info.prep == 'P')
+		master->info.prep = 'P';
+}
+
+void updateSP(Node *master, Node *root){
+	if(master->GPrep != 1 && root->GPrep == 1)
+		master->GPrep = 1;
+	if(master->GScop != 1 && root->GScop == 1)
+		master->GScop = 1;
+}
+
 void updateNeighbor(Node *master, Neighbor *nei){
 	Neighbor *naux;
 	Neighbor *maux;
@@ -95,14 +186,13 @@ void updateNeighbor(Node *master, Neighbor *nei){
 	for(naux = nei; naux != NULL; naux = naux->next){
 		found = 0;
 		for(maux = master->neighbor; maux != NULL; maux = maux->next){
-			if(strcmp(naux->asn, maux->asn) == 0){
+			if(strcmp(naux->asn, maux->asn) == 0 && naux->prep == maux->prep){
 				found = 1;
 				break;
 			}
 		}
 		if(found == 0){
-
-			master->neighbor = neighborNew(naux->asn,master->neighbor);
+			master->neighbor = neighborNew(naux->asn, naux->prep, master->neighbor);
 			(master->nnei)++;
 		}
 	}

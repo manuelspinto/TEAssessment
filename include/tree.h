@@ -3,6 +3,7 @@
 
 typedef struct neighbor{
 	char asn[AS_SIZE];
+  char prep;
 	struct neighbor *next;
 } Neighbor;
 
@@ -34,6 +35,11 @@ typedef struct node{
   int nnei; /* Number of neighbhors */
   int nchild;
   int nneiP;
+
+  int GPrep;
+  int GScop;
+
+
   struct node *parent;
   struct neighbor *neighbor;
   struct node_info info;
@@ -54,7 +60,7 @@ char * hex2bin4(char hex);
 void TreeInsert(Node * root, Line l, nInfo info);
 void TreeSpread(Node * root);
 void TreeParentSpread(Node * root);
-void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx, int *prepx);
+void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deltpx, int *deapx, int *lonpx, int *toppx, int*topdea, int *prepx, int *preptype);
 void TablePrint_ipv6(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx, int *prepx);
 void TreeClean(Node * root);
 void printTree(Node *root);
