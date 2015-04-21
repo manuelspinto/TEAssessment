@@ -57,7 +57,7 @@ void printTopPx(Node *root, int *top){
   if(root->parent == root && root->child != NULL){
   	(*top)++;
   	if((*top)%100 == 0){
-	  	printf("\nFATHER:\n\t(%s)\t%s/%d\t%s\t%c\n", root->asn, root->info.px, root->info.mask, root->info.nei, root->info.prep);
+	  	printf("\nFATHER:\n\t%s/%d\t%s\n", root->info.px, root->info.mask, root->info.nei);
 	    printNeighbor(root->neighbor);
 	    printf("CHILDREN:\n");
 	    printChildren(root);
@@ -77,8 +77,8 @@ void printChildren(Node *root){
 	Neighbor *nei;
 
 	for(aux=root->child; aux != NULL ; aux = aux->next){
-		printf("%d\t(%s)\t%s/%d\t%s\t%c", aux->node->info.mask - aux->node->parent->info.mask
-										  , aux->node->asn, aux->node->info.px, aux->node->info.mask
+		printf("%d\t%s/%d\t%s(%c)\t", aux->node->info.mask - aux->node->parent->info.mask
+										  , aux->node->info.px, aux->node->info.mask
 										  , aux->node->info.nei, aux->node->info.prep);
 		for(nei = aux->node->neighbor; nei != NULL ; nei = nei->next)
 			printf("\t%s(%c)",nei->asn,nei->prep);
@@ -103,10 +103,20 @@ int getLvl(double f){
 void masterFill(Node **root){
 	int i;
 
-	for(i = 1; i < 36; i++){
+	for(i = 1; i < COLL_SIZE; i++){
 		mergeNeighborDEA(root[0], root[i]);
 		mergeSP(root[0], root[i]);
-		fprintf(stdout,":%.0lf%%\n",(double)(((double)i)/ 36) * 100);
+		fprintf(stdout,":%.0lf%%\n",(double)(((double)i)/ COLL_SIZE) * 100);
+	}
+}
+
+void masterFill_ipv6(Node **root){
+	int i;
+
+	for(i = 1; i < COLL_SIZE_IPV6; i++){
+		/*mergeNeighborDEA_ipv6(root[0], root[i]);*/
+		mergeSP_ipv6(root[0], root[i]);
+		fprintf(stdout,":%.0lf%%\n",(double)(((double)i)/ COLL_SIZE_IPV6) * 100);
 	}
 }
 
@@ -143,6 +153,22 @@ void mergeNeighborDEA(Node *master, Node *root){
 		mergeNeighborDEA(master, root->rc);
 }
 
+void mergeNeighborDEA_ipv6(Node *master, Node *root){
+	Node *aux = NULL;
+
+	if(root->px == 1){
+		aux = getNode_ipv6(master, root);
+		if(aux != NULL && aux->px == 1)
+			updateNeighbor(aux, root->neighbor);
+	}
+
+	if(root->lc != NULL)
+		mergeNeighborDEA_ipv6(master, root->lc);
+
+	if(root->rc != NULL)
+		mergeNeighborDEA_ipv6(master, root->rc);
+}
+
 void mergeSP(Node *master, Node *root){
 	Node *aux;
 
@@ -161,6 +187,26 @@ void mergeSP(Node *master, Node *root){
 
 	if(root->rc != NULL)
 		mergeSP(master, root->rc);
+}
+
+void mergeSP_ipv6(Node *master, Node *root){
+	Node *aux;
+
+	if(root->px == 1){
+		aux = getNode_ipv6(master, root);
+		if(aux != NULL && aux->px == 1) {
+			if((root->parent == root) && (root->child != NULL))
+				updateSP(aux, root);
+			else 
+				updateP(aux, root);
+		}
+	}
+
+	if(root->lc != NULL)
+		mergeSP_ipv6(master, root->lc);
+
+	if(root->rc != NULL)
+		mergeSP_ipv6(master, root->rc);
 }
 
 void updateP(Node *master, Node *root){
@@ -205,6 +251,31 @@ Node *getNode(Node *root, Node *node){
 	char ip[129];
 
 	strcpy(ip, dec2bin(node->info.px));
+
+	for(i= 0; i<mask;i++){
+		if(ip[i] == '0'){
+			if(p->lc != NULL)
+				p = p->lc;
+			else
+				return NULL;
+		}else{
+			if(p->rc != NULL)
+				p = p->rc;
+			else
+				return NULL;
+		} 
+	}
+			
+	return p; 
+}
+
+Node *getNode_ipv6(Node *root, Node *node){
+	int i;
+	Node *p = root;
+	int mask = node->info.mask;
+	char ip[129];
+
+	strcpy(ip, hex2binv6(node->info.px));
 
 	for(i= 0; i<mask;i++){
 		if(ip[i] == '0'){

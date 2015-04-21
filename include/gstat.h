@@ -1,10 +1,13 @@
 
 void masterFill(Node **root);
+void masterFill_ipv6(Node **root);
 void mergeNeighbor(Node *master, Node *root);
 void mergeSP(Node *master, Node *root);
+void mergeSP_ipv6(Node *master, Node *root);
 void updateNeighbor(Node *master, Neighbor *nei);
 void mergeNeighborDEA(Node *master, Node *root);
 Node *getNode(Node *root, Node *node);
+Node *getNode_ipv6(Node *root, Node *node);
 void updateSP(Node *master, Node *root);
 void updateP(Node *master, Node *root);
 

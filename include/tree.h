@@ -61,7 +61,7 @@ void TreeInsert(Node * root, Line l, nInfo info);
 void TreeSpread(Node * root);
 void TreeParentSpread(Node * root);
 void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deltpx, int *deapx, int *lonpx, int *toppx, int*topdea, int *prepx, int *preptype);
-void TablePrint_ipv6(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx, int *prepx);
+void TablePrint_ipv6(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deltpx, int *deapx, int *lonpx, int *toppx, int*topdea, int *prepx, int *preptype);
 void TreeClean(Node * root);
 void printTree(Node *root);
 void TopTreePrint(Node * root, Node * p, int *ret, int *topcnt);

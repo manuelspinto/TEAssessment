@@ -78,28 +78,35 @@ void search_do(int opt, char** argv, FILE *fp){
 			TreeClean(root);
 			break;
 		case 4 :
-			getCollectorFp(fp_ipv4, argv[2]);
+			
 
 			printf("Building Prefixes Tree...");
 			if(ip_version == '6'){
-				for(i = 0; i < 17 ; i++){
+				getCollectorFp_ipv6(fp_ipv6, argv[2]);
+				for(i = 0; i < COLL_SIZE_IPV6 ; i++){
 					root_ipv6[i] = BuildPrefixTree_ipv6(fp_ipv6[i]);
 					TreeParentSpread(root_ipv6[i]);
 					ChildSpread(root_ipv6[i]);
+					checkScopAndPrep(root_ipv6[i]);
+					fprintf(stdout,":%.0lf%%\n",(double)(((double)i)/ COLL_SIZE_IPV6) * 100);
 				}
 			}
 			else{
-				for(i = 0; i < 36 ; i++){
+				getCollectorFp(fp_ipv4, argv[2]);
+				for(i = 0; i < COLL_SIZE ; i++){
 					root_ipv4[i] = BuildPrefixTree(fp_ipv4[i]);
 					TreeParentSpread(root_ipv4[i]);
 					ChildSpread(root_ipv4[i]);
 					checkScopAndPrep(root_ipv4[i]);
-					fprintf(stdout,":%.0lf%%\n",(double)(((double)i)/ 36) * 100);
+					fprintf(stdout,":%.0lf%%\n",(double)(((double)i)/ COLL_SIZE) * 100);
 				}
 			}
 			printf("done!\n");
 			printf("Filling Master root...\n");
-			masterFill(root_ipv4);
+			if(ip_version == '6')
+				masterFill_ipv6(root_ipv6);
+			else
+				masterFill(root_ipv4);
 			printf("done\n");
 			showHelpG();
 			while(1){
@@ -115,16 +122,30 @@ void search_do(int opt, char** argv, FILE *fp){
 						search_deaggregation_statistics(root_ipv4[0]);
 						break;
 					case 't':
-						printf("\n**** One collector\n");
-						search_te_statistics(root_ipv4[1]);
-						printf("\n\n****All collectors\n\n");
-						search_te_statistics(root_ipv4[0]);
+						if(ip_version == '6'){
+							printf("\n**** One collector\n");
+							search_te_statistics(root_ipv6[1]);
+							printf("\n\n****All collectors\n\n");
+							search_te_statistics(root_ipv6[0]);
+						}else{
+							printf("\n**** One collector\n");
+							search_te_statistics(root_ipv4[1]);
+							printf("\n\n****All collectors\n\n");
+							search_te_statistics(root_ipv4[0]);
+						}
 						break;
 					case 'p':
-						printf("\n**** One collector\n");
-							search_prefix_type_statistics(root_ipv4[1]);
-						printf("\n\n****All collectors\n\n");
-							search_prefix_type_statistics(root_ipv4[0]);
+						if(ip_version == '6'){
+							printf("\n**** One collector\n");
+								search_prefix_type_statistics_ipv6(root_ipv6[1]);
+							printf("\n\n****All collectors\n\n");
+								search_prefix_type_statistics_ipv6(root_ipv6[0]);
+						}else{
+							printf("\n**** One collector\n");
+								search_prefix_type_statistics(root_ipv4[1]);
+							printf("\n\n****All collectors\n\n");
+								search_prefix_type_statistics(root_ipv4[0]);
+						}
 						break;
 					case 's':
 						printTopTree(root_ipv4[0]);
@@ -138,10 +159,10 @@ void search_do(int opt, char** argv, FILE *fp){
 			}
 			printf("Cleaning Trees...\n");
 			if(ip_version == '6')
-				for(i = 0; i < 17 ; i++)
+				for(i = 0; i < COLL_SIZE_IPV6 ; i++)
 					TreeClean(root_ipv6[i]);
 			else
-				for(i = 0; i < 36 ; i++){
+				for(i = 0; i < COLL_SIZE ; i++){
 					TreeClean(root_ipv4[i]);
 					fprintf(stdout,":%.0lf%%\n",(double)(((double)i)/ 36) * 100);
 				}
@@ -182,6 +203,23 @@ void getCollectorFp(FILE **fp_collector, char *fname){
 		strcpy(fname_aux,fname);
 		strcat(fname_aux,".");
 		strcat(fname_aux,collector_asn[i]);
+		strcat(fname_aux,".txt");
+		fix_path(fname_aux,dir_rib_out);
+		fp_collector[i] = fopen(fname_aux,"r");
+		if(fp_collector[i] == NULL){
+			fprintf(stderr,"Error: cannot open file '%s'\n",fname_aux);exit(3);}
+	}
+}
+
+void getCollectorFp_ipv6(FILE **fp_collector, char *fname){
+	int i;
+	char *dir_rib_out = "rib_out/ipv6/";
+	char fname_aux[128];
+
+	for(i = 0; i < COLL_SIZE_IPV6; i++){
+		strcpy(fname_aux,fname);
+		strcat(fname_aux,".");
+		strcat(fname_aux,collector_asn_ipv6[i]);
 		strcat(fname_aux,".txt");
 		fix_path(fname_aux,dir_rib_out);
 		fp_collector[i] = fopen(fname_aux,"r");

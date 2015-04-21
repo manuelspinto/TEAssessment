@@ -40,9 +40,9 @@ char collector_asn[COLL_SIZE][10] = { "202018",
 							  "3303",
 						};
 
-char collector_asn_ipv6[COLL_SIZE_IPV6][10] = {   "38883",
+char collector_asn_ipv6[COLL_SIZE_IPV6][10] = {   "10102",
 							  					  "59469",
-												  "10102",
+												  "38883",
 												  "2518",
 												  "36236",
 												  "1299",

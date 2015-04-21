@@ -416,7 +416,9 @@ void TablePrint(Node * root, Node * p, char * str, int * index, int *totpx
   return;
 }
 
-void TablePrint_ipv6(Node * root, Node * p, char * str, int * index, int *totpx, int *delpx, int *deapx, int *lonpx, int *toppx, int *prepx){
+void TablePrint_ipv6(Node * root, Node * p, char * str, int * index, int *totpx
+              , int *delpx, int *deltpx, int *deapx, int *lonpx, int *toppx, int *topdea
+              , int *prepx, int *preptype){
   int i = 0;
 
   (*index)++;
@@ -429,26 +431,44 @@ void TablePrint_ipv6(Node * root, Node * p, char * str, int * index, int *totpx,
       (*prepx)++;
 
     if(strcmp(p->asn,"-1") == 0) {
-      if(root->lc != NULL || root->rc != NULL)
-        (*toppx)++;
-      else
+      if(root->lc != NULL || root->rc != NULL){
+        if(root->child != NULL){
+          (*topdea)++;
+          if(root->info.prep == 'P') preptype[5]++;
+        }else{
+          (*toppx)++;
+          if(root->info.prep == 'P') preptype[0]++;
+        }
+      }
+      else{
         (*lonpx)++;
+        if(root->info.prep == 'P') preptype[1]++;
+      }
     }else{
-      if(asncmp(p->asn,root->asn) == 0)
+      if(asncmp(p->asn,root->asn) == 0){
         (*deapx)++;
-      else
-        (*delpx)++; 
+        if(root->info.prep == 'P') preptype[2]++;
+      }
+      else{
+        if(root->child != NULL){
+          (*deltpx)++;
+          if(root->info.prep == 'P') preptype[3]++;
+        }else{
+          (*delpx)++; 
+          if(root->info.prep == 'P') preptype[4]++;
+        }
+      }
     }
   }
   
   if(root->lc != NULL){
     str[*index] = '0';
-    TablePrint_ipv6(root->lc, root, str, index, totpx, delpx, deapx, lonpx, toppx, prepx);
+    TablePrint(root->lc, root, str, index, totpx, delpx, deltpx, deapx, lonpx, toppx, topdea, prepx, preptype);
   }
 
   if(root->rc != NULL){
     str[*index] = '1';
-    TablePrint_ipv6(root->rc, root, str, index, totpx, delpx, deapx, lonpx, toppx, prepx);
+    TablePrint(root->rc, root, str, index, totpx, delpx, deltpx, deapx, lonpx, toppx, topdea, prepx, preptype);
   }
   (*index)--;
   

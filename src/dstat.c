@@ -38,25 +38,30 @@ void search_neighbor_deaggregation_statistics(Node *root){
 void search_te_statistics(Node *root){
   int i;
   int *te;
+  int *dea;
   int top =0;
   int tetot = 0;
 
-  te = (int*) malloc(4*sizeof(int));
+  te = (int*) malloc(3*sizeof(int));
+  dea = (int*) malloc(2*sizeof(int));
 
-  for(i = 0; i < 4; i++)
+  for(i = 0; i < 3; i++)
     te[i] = 0;
 
-  getStatTE(root, te, &top);
+  for(i = 0; i<3; i++)
+    dea[i] = 0;
+
+  getStatTE(root, te, dea, &top);
 
   printf("\ntop = %d\n\n", top);
   printf("Scoped?\tPrep?\t#top\t%%top\n");
-  printf("NO\tNO\t%d\t%.2lf%%\n"  , te[0], (((double)te[0])/((double)top)) * 100);
-  printf("NO\tYES\t%d\t%.2lf%%\n" , te[1], (((double)te[1])/((double)top)) * 100);
-  printf("YES\tNO\t%d\t%.2lf%%\n" , te[2], (((double)te[2])/((double)top)) * 100);
-  printf("YES\tYES\t%d\t%.2lf%%\n", te[3], (((double)te[3])/((double)top)) * 100);
+  printf("NO\tNO\t%d\t%.2lf%%\t%d\n"  , te[0], (((double)te[0])/((double)top)) * 100, dea[0]);
+  printf("YES\tNO\t%d\t%.2lf%%\t%d\n" , te[1], (((double)te[1])/((double)top)) * 100, dea[1]);
+  printf("-\tYES\t%d\t%.2lf%%\t%d\n", te[2], (((double)te[2])/((double)top)) * 100, dea[2]);
 
-  for(i = 1; i<4; i++)
+  for(i = 1; i<3; i++)
     tetot+=te[i];
+
 
 
   printf("\nTE:\t%d\t%.2lf%%\n", tetot, (((double)tetot)/((double)top)) * 100);
@@ -116,11 +121,11 @@ void ChildSpread(Node *root){
 
       root->neighbor = neighborNew(root->info.nei, root->info.prep, root->neighbor); /*****/
     	
-      /* COMENT BLOCK IF PRINTING IS USED */
-      if(check_neighbor(root->parent->neighbor,root->info.nei) == 0){
+      /* COMMENT BLOCK IF PRINTING IS USED */
+      /*if(check_neighbor(root->parent->neighbor,root->info.nei) == 0){
     		root->parent->neighbor = neighborNew(root->info.nei,root->info.prep,root->parent->neighbor);
     		root->parent->nnei++;
-    	}
+    	}*/
     }
   }
 
@@ -181,27 +186,29 @@ void getStat(Node *root, int *top, int *ncount, int *nprep){
 
   return;
 }
-void getStatTE(Node *root, int *te, int *top){
+void getStatTE(Node *root, int *te, int *dea, int *top){
   if(root->px == 1 && root->parent == root && root->child != NULL){ /** top **/
     (*top)++;
-    if(root->GScop == 0 && root->GPrep == 0)
+    if(root->GScop == 0 && root->GPrep == 0){
       te[0]++;
+      dea[0]+=root->nchild;
+    }
     else {
-      if(root->GScop == 0 && root->GPrep == 1)
+      if(root->GScop == 1 && root->GPrep == 0){
         te[1]++;
+        dea[1]+=root->nchild;
+      }
       else {
-        if(root->GScop == 1 && root->GPrep == 0)
-          te[2]++;
-        else
-          te[3]++;
+        te[2]++;
+        dea[2]+=root->nchild;
       }
     }
   }
   
   if(root->lc != NULL)
-    getStatTE(root->lc, te, top);
+    getStatTE(root->lc, te, dea, top);
   if(root->rc != NULL)
-    getStatTE(root->rc, te, top);
+    getStatTE(root->rc, te, dea, top);
 
   return;
 }
