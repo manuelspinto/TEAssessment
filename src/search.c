@@ -42,6 +42,7 @@ void search_do(int opt, char** argv, FILE *fp){
 			printf("done!\nSpreading Parent Information...");
 			TreeParentSpread(root);
 			ChildSpread(root);
+			checkScopAndPrep(root);
 			printf("done!\n");
 			showHelp();
 			while(1){

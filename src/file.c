@@ -3,8 +3,7 @@
 #include "global.h"
 #include "file.h"
 
-extern char collector_asn[36][10];
-extern char collector_px[36][16];
+extern char collector_asn[COLL_SIZE][10];
 
 FILE *file_open(char *fname){
 	FILE *fp;

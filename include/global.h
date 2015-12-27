@@ -7,8 +7,8 @@
 #include <string.h>
 
 #define BUFF_SIZE 512
-#define COLL_SIZE 36
-#define COLL_SIZE_IPV6 17
+#define COLL_SIZE 34
+#define COLL_SIZE_IPV6 7
 #define AS_SIZE 40
 
 extern char collector_asn[COLL_SIZE][10];

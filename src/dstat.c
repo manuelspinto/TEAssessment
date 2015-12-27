@@ -122,10 +122,10 @@ void ChildSpread(Node *root){
       root->neighbor = neighborNew(root->info.nei, root->info.prep, root->neighbor); /*****/
     	
       /* COMMENT BLOCK IF PRINTING IS USED */
-      /*if(check_neighbor(root->parent->neighbor,root->info.nei) == 0){
+      if(check_neighbor(root->parent->neighbor,root->info.nei) == 0){
     		root->parent->neighbor = neighborNew(root->info.nei,root->info.prep,root->parent->neighbor);
     		root->parent->nnei++;
-    	}*/
+    	}
     }
   }
 
@@ -172,7 +172,7 @@ int checkScoped(Node *root){
 
 void getStat(Node *root, int *top, int *ncount, int *nprep){
 
-  if(root->px == 1 && root->parent == root && root->child != NULL){
+  if(root->px == 1 && root->parent == root && root->child != NULL /*&& root->GScop == 1 && root->GPrep == 0*/){
     	(*top)++;
     	ncount[root->nnei-1]++;
       if(root->info.prep == 'P')
@@ -218,7 +218,7 @@ void getStatTE(Node *root, int *te, int *dea, int *top){
 void getStatLen(Node *root, int *top, int *deag, int *lencount){
   Child *aux;
 
-  if(root->px == 1 && root->parent == root && root->child != NULL){
+  if(root->px == 1 && root->parent == root && root->child != NULL && root->GScop == 1 && root->GPrep != 1){
       (*top)++;
       for(aux = root->child; aux != NULL; aux = aux->next){
         lencount[LEN_OFFSET + (root->info.hlen - aux->node->info.hlen)]++;

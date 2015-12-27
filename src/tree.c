@@ -442,6 +442,7 @@ void TablePrint_ipv6(Node * root, Node * p, char * str, int * index, int *totpx
       }
       else{
         (*lonpx)++;
+        /*printf("%s / %d\n",root->info.px,root->info.mask);*/
         if(root->info.prep == 'P') preptype[1]++;
       }
     }else{
@@ -463,12 +464,12 @@ void TablePrint_ipv6(Node * root, Node * p, char * str, int * index, int *totpx
   
   if(root->lc != NULL){
     str[*index] = '0';
-    TablePrint(root->lc, root, str, index, totpx, delpx, deltpx, deapx, lonpx, toppx, topdea, prepx, preptype);
+    TablePrint_ipv6(root->lc, root, str, index, totpx, delpx, deltpx, deapx, lonpx, toppx, topdea, prepx, preptype);
   }
 
   if(root->rc != NULL){
     str[*index] = '1';
-    TablePrint(root->rc, root, str, index, totpx, delpx, deltpx, deapx, lonpx, toppx, topdea, prepx, preptype);
+    TablePrint_ipv6(root->rc, root, str, index, totpx, delpx, deltpx, deapx, lonpx, toppx, topdea, prepx, preptype);
   }
   (*index)--;
   

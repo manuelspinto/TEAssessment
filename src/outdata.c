@@ -12,7 +12,7 @@ void search_prepare_data(FILE *fp, char* fname){
 	char fname_aux[128];
 	char buff[BUFF_SIZE];
 	FILE *fp_out;
-	FILE *fp_collector[36];
+	FILE *fp_collector[COLL_SIZE];
 	char entry;
 	char as_col[AS_SIZE],as_nei[AS_SIZE],as_ori[AS_SIZE];
 	char px[20], mask[10];
@@ -48,7 +48,7 @@ void search_prepare_data(FILE *fp, char* fname){
 				stat = get_asns(buff,&as_ori[0],&as_col[0],&as_nei[0]);
 				as_entry = get_as_entry(as_col);
 				getNeighbor(buff,&as_nei[0]);
-				if(stat == 0 && as_entry != -1){
+				if(stat == 0 && as_entry != -1 && atoi(mask) <= 24) {
 					fprintf(fp_collector[as_entry],"%c %d %d %s %s %s %s %s\n"
 														  ,checkPrepending(buff)
 														  ,checkPathLength(buff)
@@ -77,7 +77,7 @@ void search_prepare_data_ipv6(FILE *fp, char* fname){
 	char fname_aux[128];
 	char buff[BUFF_SIZE];
 	FILE *fp_out;
-	FILE *fp_collector[17];
+	FILE *fp_collector[COLL_SIZE_IPV6];
 	char entry;
 	char as_col[AS_SIZE],as_nei[AS_SIZE],as_ori[AS_SIZE];
 	char px[40], mask[10];
@@ -113,7 +113,7 @@ void search_prepare_data_ipv6(FILE *fp, char* fname){
 				stat = get_asns(buff,&as_ori[0],&as_col[0],&as_nei[0]);
 				as_entry = get_as_entry_ipv6(as_col);
 				getNeighbor(buff,&as_nei[0]);
-				if(stat == 0 && as_entry != -1){
+				if(stat == 0 && as_entry != -1 && atoi(mask) <= 48){
 					fprintf(fp_collector[as_entry],"%c %d %d %s %s %s %s %s\n"
 														  ,checkPrepending(buff)
 														  ,checkPathLength(buff)
